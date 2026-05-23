@@ -21,8 +21,25 @@ public static class SetsAndMaps
     /// <param name="words">An array of 2-character words (lowercase, no duplicates)</param>
     public static string[] FindPairs(string[] words)
     {
-        // TODO Problem 1 - ADD YOUR CODE HERE
-        return [];
+        var seenWords = new HashSet<string>();
+        var pairs = new List<string>();
+
+        foreach (var word in words)
+        {
+            if (!seenWords.Add(word))
+            {
+                continue;
+            }
+
+            var reversed = $"{word[1]}{word[0]}";
+
+            if (word[0] != word[1] && seenWords.Contains(reversed))
+            {
+                pairs.Add($"{word} & {reversed}");
+            }
+        }
+
+        return pairs.ToArray();
     }
 
     /// <summary>
@@ -42,7 +59,16 @@ public static class SetsAndMaps
         foreach (var line in File.ReadLines(filename))
         {
             var fields = line.Split(",");
-            // TODO Problem 2 - ADD YOUR CODE HERE
+            var degree = fields[3];
+
+            if (degrees.ContainsKey(degree))
+            {
+                degrees[degree]++;
+            }
+            else
+            {
+                degrees[degree] = 1;
+            }
         }
 
         return degrees;
@@ -66,8 +92,57 @@ public static class SetsAndMaps
     /// </summary>
     public static bool IsAnagram(string word1, string word2)
     {
-        // TODO Problem 3 - ADD YOUR CODE HERE
-        return false;
+        var letterCounts = new Dictionary<char, int>();
+
+        foreach (var letter in word1)
+        {
+            if (letter == ' ')
+            {
+                continue;
+            }
+
+            var normalizedLetter = NormalizeLetter(letter);
+            if (letterCounts.ContainsKey(normalizedLetter))
+            {
+                letterCounts[normalizedLetter]++;
+            }
+            else
+            {
+                letterCounts[normalizedLetter] = 1;
+            }
+        }
+
+        foreach (var letter in word2)
+        {
+            if (letter == ' ')
+            {
+                continue;
+            }
+
+            var normalizedLetter = NormalizeLetter(letter);
+            if (!letterCounts.ContainsKey(normalizedLetter))
+            {
+                return false;
+            }
+
+            letterCounts[normalizedLetter]--;
+            if (letterCounts[normalizedLetter] == 0)
+            {
+                letterCounts.Remove(normalizedLetter);
+            }
+        }
+
+        return letterCounts.Count == 0;
+    }
+
+    private static char NormalizeLetter(char letter)
+    {
+        if (letter >= 'A' && letter <= 'Z')
+        {
+            return (char)(letter + ('a' - 'A'));
+        }
+
+        return letter;
     }
 
     /// <summary>
@@ -101,6 +176,13 @@ public static class SetsAndMaps
         // on those classes so that the call to Deserialize above works properly.
         // 2. Add code below to create a string out each place a earthquake has happened today and its magitude.
         // 3. Return an array of these string descriptions.
-        return [];
+        if (featureCollection == null)
+        {
+            return [];
+        }
+
+        return featureCollection.Features
+            .Select(feature => $"{feature.Properties.Place} - Mag {feature.Properties.Mag}")
+            .ToArray();
     }
 }
